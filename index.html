@@ -2,40 +2,108 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <title>App IA</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mi Chatbot Gemini</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
-      background: #f5f7fa;
-      padding: 40px;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #eef2f7;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
     }
     .box {
-      max-width: 600px;
-      margin: auto;
+      width: 90%;
+      max-width: 500px;
       background: white;
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
     }
+    h2 { color: #333; margin-top: 0; }
     textarea {
       width: 100%;
-      height: 80px;
+      height: 100px;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      resize: none;
+      box-sizing: border-box;
+      font-size: 16px;
     }
     button {
-      margin-top: 10px;
-      padding: 10px 20px;
+      width: 100%;
+      margin-top: 15px;
+      padding: 12px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: bold;
     }
+    button:hover { background-color: #0056b3; }
+    button:disabled { background-color: #ccc; }
     .respuesta {
       margin-top: 20px;
+      padding: 15px;
+      background: #f8f9fa;
+      border-left: 4px solid #007bff;
+      border-radius: 4px;
+      min-height: 50px;
       white-space: pre-wrap;
+      color: #444;
     }
   </style>
 </head>
 
 <body>
   <div class="box">
-    <h2>🤖 App IA en Vercel</h2>
-    <p>Si ves esto, tu deploy funciona 🎉</p>
+    <h2>🤖 Mi Asistente IA</h2>
+    <textarea id="userInput" placeholder="Escribe tu pregunta aquí..."></textarea>
+    <button id="sendBtn" onclick="preguntarIA()">Enviar a Gemini</button>
+    <div id="result" class="respuesta">La respuesta aparecerá aquí...</div>
   </div>
+
+  <script>
+    async function preguntarIA() {
+      const input = document.getElementById('userInput');
+      const btn = document.getElementById('sendBtn');
+      const resultDiv = document.getElementById('result');
+      
+      const prompt = input.value.trim();
+      if (!prompt) return alert("Escribe algo primero");
+
+      // Bloquear botón y mostrar carga
+      btn.disabled = true;
+      btn.innerText = "Pensando...";
+      resultDiv.innerText = "Consultando a la mente digital...";
+
+      try {
+        const response = await fetch('/api/ask', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ prompt: prompt })
+        });
+
+        const data = await response.json();
+        
+        if (data.text) {
+          resultDiv.innerText = data.text;
+        } else {
+          resultDiv.innerText = "Error: " + (data.error || "No se recibió respuesta");
+        }
+      } catch (error) {
+        resultDiv.innerText = "Error crítico al conectar con la API.";
+        console.error(error);
+      } finally {
+        btn.disabled = false;
+        btn.innerText = "Enviar a Gemini";
+      }
+    }
+  </script>
 </body>
 </html>
