@@ -30,15 +30,18 @@ export default async function handler(req, res) {
       })
     });
 
+    // ... código anterior ...
     const data = await response.json();
 
-    // Verificamos que la respuesta exista antes de leerla
-    const text = data.candidates?.[0]?.content?.parts?.[0]?.text || "Lo siento, no pude generar una respuesta.";
+    if (data.error) {
+      return res.status(500).json({ text: "Error de Google: " + data.error.message });
+    }
 
+    const text = data.candidates?.[0]?.content?.parts?.[0]?.text || "Respuesta vacía de Gemini";
     res.status(200).json({ text });
 
   } catch (error) {
-    console.error("Error en la API:", error);
-    res.status(500).json({ error: "Error al conectar con Gemini" });
+    res.status(500).json({ text: "Error de conexión: " + error.message });
   }
 }
+
