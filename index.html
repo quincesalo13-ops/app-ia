@@ -2,108 +2,97 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Mi Chatbot Gemini</title>
+  <title>IA Pro</title>
   <style>
     body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: #eef2f7;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      margin: 0;
+      background: #0f172a;
+      color: white;
+      font-family: Arial, sans-serif;
+      padding: 40px;
     }
     .box {
-      width: 90%;
-      max-width: 500px;
-      background: white;
+      max-width: 700px;
+      margin: auto;
+      background: #020617;
       padding: 30px;
-      border-radius: 15px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+      border-radius: 16px;
+      box-shadow: 0 0 30px rgba(59,130,246,.3);
     }
-    h2 { color: #333; margin-top: 0; }
     textarea {
       width: 100%;
-      height: 100px;
-      padding: 10px;
-      border: 1px solid #ddd;
-      border-radius: 8px;
-      resize: none;
-      box-sizing: border-box;
+      height: 120px;
+      background: #020617;
+      color: white;
+      border: 1px solid #334155;
+      border-radius: 10px;
+      padding: 15px;
       font-size: 16px;
     }
     button {
       width: 100%;
-      margin-top: 15px;
-      padding: 12px;
-      background-color: #007bff;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 16px;
-      font-weight: bold;
-    }
-    button:hover { background-color: #0056b3; }
-    button:disabled { background-color: #ccc; }
-    .respuesta {
       margin-top: 20px;
-      padding: 15px;
-      background: #f8f9fa;
-      border-left: 4px solid #007bff;
-      border-radius: 4px;
-      min-height: 50px;
+      padding: 14px;
+      font-size: 16px;
+      background: linear-gradient(90deg,#2563eb,#4f46e5);
+      border: none;
+      color: white;
+      border-radius: 12px;
+      cursor: pointer;
+    }
+    .respuesta {
+      margin-top: 25px;
       white-space: pre-wrap;
-      color: #444;
+      line-height: 1.6;
     }
   </style>
 </head>
 
 <body>
   <div class="box">
-    <h2>🤖 Mi Asistente IA</h2>
-    <textarea id="userInput" placeholder="Escribe tu pregunta aquí..."></textarea>
-    <button id="sendBtn" onclick="preguntarIA()">Enviar a Gemini</button>
-    <div id="result" class="respuesta">La respuesta aparecerá aquí...</div>
+    <h2>🤖 IA Pro</h2>
+    <p>Pregunta lo que quieras. Respuestas claras y humanas.</p>
+
+    <textarea id="prompt" placeholder="Escribe aquí tu pregunta"></textarea>
+    <button onclick="preguntar()">Preguntar</button>
+
+    <div class="respuesta" id="respuesta"></div>
   </div>
 
-  <script>
-    async function preguntarIA() {
-      const input = document.getElementById('userInput');
-      const btn = document.getElementById('sendBtn');
-      const resultDiv = document.getElementById('result');
-      
-      const prompt = input.value.trim();
-      if (!prompt) return alert("Escribe algo primero");
+<script>
+async function preguntar() {
+  const texto = document.getElementById("prompt").value;
+  const respuestaDiv = document.getElementById("respuesta");
 
-      // Bloquear botón y mostrar carga
-      btn.disabled = true;
-      btn.innerText = "Pensando...";
-      resultDiv.innerText = "Consultando a la mente digital...";
+  if (!texto.trim()) {
+    respuestaDiv.innerText = "⚠️ Escribe una pregunta primero.";
+    return;
+  }
 
-      try {
-        const response = await fetch('/api/ask', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ prompt: prompt })
-        });
+  respuestaDiv.innerText = "⏳ Pensando...";
 
-        const data = await response.json();
-        
-        if (data.text) {
-          resultDiv.innerText = data.text;
-        } else {
-          resultDiv.innerText = "Error: " + (data.error || "No se recibió respuesta");
-        }
-      } catch (error) {
-        resultDiv.innerText = "Error crítico al conectar con la API.";
-        console.error(error);
-      } finally {
-        btn.disabled = false;
-        btn.innerText = "Enviar a Gemini";
+  try {
+    const res = await fetch(
+      "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=AIzaSyAP0xNpLPK5E52wiZqGHo-xh7awFs4wN_Q,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: texto }] }]
+        })
       }
-    }
-  </script>
+    );
+
+    const data = await res.json();
+
+    respuestaDiv.innerText =
+      data.candidates?.[0]?.content?.parts?.[0]?.text ||
+      "❌ Sin respuesta del modelo.";
+
+  } catch (error) {
+    respuestaDiv.innerText = "❌ Error de conexión con la IA.";
+  }
+}
+</script>
+
 </body>
 </html>
