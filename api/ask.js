@@ -8,16 +8,14 @@ export default async function handler(req, res) {
   try {
     const { prompt } = req.body;
     
-    // URL DEFINITIVA: v1 (estable) y gemini-1.5-flash
-    const apiUrl = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`;
+    // URL DEFINITIVA: v1beta es la que sí reconoce a gemini-1.5-flash
+    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`;
 
     const response = await fetch(apiUrl, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        contents: [{
-          parts: [{ text: prompt }]
-        }]
+        contents: [{ parts: [{ text: prompt }] }]
       })
     });
 
@@ -25,15 +23,14 @@ export default async function handler(req, res) {
 
     if (data.error) {
       return res.status(data.error.code || 500).json({ 
-        text: `Error de Google (${data.error.code}): ${data.error.message}` 
+        text: `Error de Google: ${data.error.message}` 
       });
     }
 
-    // Extracción segura de la respuesta
-    const text = data.candidates?.[0]?.content?.parts?.[0]?.text || "La IA no devolvió una respuesta válida.";
+    const text = data.candidates?.[0]?.content?.parts?.[0]?.text || "Sin respuesta de la IA.";
     res.status(200).json({ text });
 
   } catch (error) {
-    res.status(500).json({ text: "Error de servidor: " + error.message });
+    res.status(500).json({ text: "Error: " + error.message });
   }
 }
