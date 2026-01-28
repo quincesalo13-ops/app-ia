@@ -8,7 +8,7 @@ export default async function handler(req, res) {
   try {
     const { prompt } = req.body;
     
-    // URL DEFINITIVA: v1beta es la que sí reconoce a gemini-1.5-flash
+    // URL CORREGIDA: Google requiere v1beta para usar gemini-1.5-flash así
     const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`;
 
     const response = await fetch(apiUrl, {
