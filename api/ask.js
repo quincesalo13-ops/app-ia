@@ -7,30 +7,37 @@ export default async function handler(req, res) {
 
   try {
     const { prompt } = req.body;
-    
-    // URL CORREGIDA: Google requiere v1beta para usar gemini-1.5-flash así
-    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`;
+
+    const apiUrl = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash-latest:generateContent?key=${process.env.GEMINI_API_KEY}`;
 
     const response = await fetch(apiUrl, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }]
+        contents: [
+          {
+            role: "user",
+            parts: [{ text: prompt }]
+          }
+        ]
       })
     });
 
     const data = await response.json();
 
-    if (data.error) {
-      return res.status(data.error.code || 500).json({ 
-        text: `Error de Google: ${data.error.message}` 
+    if (!response.ok) {
+      return res.status(response.status).json({
+        text: `Error de Google: ${data.error?.message || "Error desconocido"}`
       });
     }
 
-    const text = data.candidates?.[0]?.content?.parts?.[0]?.text || "Sin respuesta de la IA.";
+    const text =
+      data.candidates?.[0]?.content?.parts?.[0]?.text ||
+      "Sin respuesta de la IA.";
+
     res.status(200).json({ text });
 
   } catch (error) {
-    res.status(500).json({ text: "Error: " + error.message });
+    res.status(500).json({ text: "Error interno: " + error.message });
   }
 }
