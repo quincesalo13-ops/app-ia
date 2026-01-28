@@ -7,8 +7,9 @@ export default async function handler(req, res) {
 
   try {
     const { prompt } = req.body;
-    // URL corregida a la versión v1 para evitar el error 'not found'
-    const apiUrl = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`;
+    
+    // URL CORREGIDA: Usamos v1beta para asegurar que reconozca gemini-1.5-flash
+    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`;
 
     const response = await fetch(apiUrl, {
       method: "POST",
@@ -19,11 +20,17 @@ export default async function handler(req, res) {
     });
 
     const data = await response.json();
-    if (data.error) return res.status(500).json({ text: "Error de Google: " + data.error.message });
 
-    const text = data.candidates?.[0]?.content?.parts?.[0]?.text || "Sin respuesta";
+    if (data.error) {
+      return res.status(500).json({ 
+        text: `Error de Google (${data.error.code}): ${data.error.message}` 
+      });
+    }
+
+    const text = data.candidates?.[0]?.content?.parts?.[0]?.text || "La IA no devolvió texto.";
     res.status(200).json({ text });
+
   } catch (error) {
-    res.status(500).json({ text: "Error: " + error.message });
+    res.status(500).json({ text: "Error de conexión: " + error.message });
   }
 }
