@@ -11,7 +11,7 @@ export default async function handler(req, res) {
     }
 
     const response = await fetch(
-      "https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent",
+      "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent",
       {
         method: "POST",
         headers: {
@@ -33,17 +33,17 @@ export default async function handler(req, res) {
 
     if (!response.ok) {
       return res.status(500).json({
-        error: "Error desde Gemini",
+        error: "Gemini API error",
         details: data
       });
     }
 
-    res.status(200).json(data);
+    return res.status(200).json(data);
 
-  } catch (error) {
-    res.status(500).json({
-      error: "Error interno",
-      message: error.message
+  } catch (err) {
+    return res.status(500).json({
+      error: "Server error",
+      message: err.message
     });
   }
 }
