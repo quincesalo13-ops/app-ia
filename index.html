@@ -65,10 +65,10 @@
 
 <script>
 document.getElementById("btn").addEventListener("click", async () => {
-  const texto = document.getElementById("prompt").value;
+  const texto = document.getElementById("prompt").value.trim();
   const respuestaDiv = document.getElementById("respuesta");
 
-  if (!texto.trim()) {
+  if (!texto) {
     respuestaDiv.innerText = "⚠️ Escribe una pregunta primero.";
     return;
   }
@@ -76,15 +76,11 @@ document.getElementById("btn").addEventListener("click", async () => {
   respuestaDiv.innerText = "⏳ Pensando...";
 
   try {
-    const res = await fetch("/api/ask", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        prompt: texto
-      })
-    });
+    const res = await fetch(`/api/ask?prompt=${encodeURIComponent(texto)}`);
+
+    if (!res.ok) {
+      throw new Error("Respuesta no válida del servidor");
+    }
 
     const data = await res.json();
 
@@ -93,6 +89,7 @@ document.getElementById("btn").addEventListener("click", async () => {
       || "❌ Sin respuesta del modelo.";
 
   } catch (err) {
+    console.error(err);
     respuestaDiv.innerText = "❌ Error al conectar con la IA.";
   }
 });
